@@ -17,13 +17,23 @@
                 {
                     Id = 1,
                     Name ="Silistra",
-                    Description ="Home Town"
+                    Description ="Home Town",
+                     PointsOfInterest = new List<PointsOfInterestDto>()
+                     {
+                          new PointsOfInterestDto { Id=1, Name="Moskva", Description="The Bar" },
+                          new PointsOfInterestDto { Id=2, Name="Krepostta", Description="The Place" }
+                     }
                 },
                 new CityDto()
                 {
                     Id =2,
                     Name ="Sofia",
-                    Description ="Live Town"
+                    Description ="Live Town",
+                     PointsOfInterest = new List<PointsOfInterestDto>()
+                     {
+                          new PointsOfInterestDto { Id=1, Name="Switch", Description="The Bar" },
+                          new PointsOfInterestDto { Id=2, Name="Vitosha", Description="The Place" }
+                     }
                 }
             };
         }
