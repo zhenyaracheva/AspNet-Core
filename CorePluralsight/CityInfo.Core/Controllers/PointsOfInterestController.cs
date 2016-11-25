@@ -6,24 +6,29 @@
     using Microsoft.AspNetCore.JsonPatch;
     using DataStore;
     using Microsoft.Extensions.Logging;
+    using Services.RepositoryServices;
+    using System.Collections.Generic;
 
     [Route("api/cities")]
     public class PointsOfInterestController : Controller
     {
         private ILogger<PointsOfInterestController> logger;
         private IMailService mailService;
+        private ICityInfoRepository cityInfo;
 
-        public PointsOfInterestController(ILogger<PointsOfInterestController> logger, IMailService mailService)
+        public PointsOfInterestController(ILogger<PointsOfInterestController> loggerService, IMailService mail, ICityInfoRepository cityRepo)
         {
-            this.logger = logger;
-            this.mailService = mailService;
+            logger = loggerService;
+            mailService = mail;
+            cityInfo = cityRepo;
         }
 
         [HttpGet("{cityId}/pointsofinterest")]
         public IActionResult GetPointsOfInterest(int cityId)
         {
-            var city = DataStore.CitiesDataStore.Current.Cities
-                .FirstOrDefault(x => x.Id == cityId);
+            //var city = DataStore.CitiesDataStore.Current.Cities
+            //    .FirstOrDefault(x => x.Id == cityId);
+            var city = cityInfo.GetCity(cityId, true);
 
             if (city == null)
             {
@@ -31,29 +36,48 @@
                 return NotFound();
             }
 
-            return Ok(city.PointsOfInterest);
+            var result = new List<PointsOfInterestDto>();
+
+            foreach (var point in city.PointsOfInterest)
+            {
+                result.Add(new PointsOfInterestDto()
+                {
+                    Id = point.Id,
+                    Name = point.Name,
+                    Description = point.Description
+                });
+            }
+
+            return Ok(result);
         }
 
         [HttpGet("{cityId}/pointsofinterest/{id}", Name = "GetPointsOfInterest")]
         public IActionResult GetPointsOfInterest(int cityId, int id)
         {
-            var city = DataStore.CitiesDataStore.Current.Cities
-               .FirstOrDefault(x => x.Id == cityId);
+            var city = cityInfo.GetCity(cityId, true);
 
             if (city == null)
             {
+                this.logger.LogInformation($"No city with {cityId} id!");
                 return NotFound();
             }
 
-            var pointOfInterest = city.PointsOfInterest
-                .FirstOrDefault(x => x.Id == id);
+            var point = cityInfo.GetPointOfInterestFromCity(cityId, id);
 
-            if (pointOfInterest == null)
+            if (point == null)
             {
+                this.logger.LogInformation($"No city with {cityId} id!");
                 return NotFound();
             }
 
-            return Ok(pointOfInterest);
+            var result = new PointsOfInterestDto()
+            {
+                Id = point.Id,
+                Name = point.Name,
+                Description = point.Description
+            };
+
+            return Ok(result);
         }
 
         [HttpPost("{cityId}/pointsofinterest")]
