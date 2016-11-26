@@ -20,7 +20,7 @@
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appSettings.json", optional:false, reloadOnChange:true)
+                .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appSettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
@@ -32,7 +32,7 @@
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc()
-                .AddMvcOptions(o=>o.OutputFormatters.Add(
+                .AddMvcOptions(o => o.OutputFormatters.Add(
                     new XmlDataContractSerializerOutputFormatter()));
             // make json props as they are (not lowercase)
             //.AddJsonOptions(o =>
@@ -50,7 +50,7 @@
 #endif
             //var connectionString = "Server=.;Database=CityInfoDb;Trusted_Connection=True;";
             var connectionString = Startup.Configuration["connectionStrings:cityInfoDbConnectionString"];
-            services.AddDbContext<CityInfoDbContext>(o=> o.UseSqlServer(connectionString));
+            services.AddDbContext<CityInfoDbContext>(o => o.UseSqlServer(connectionString));
             services.AddScoped<ICityInfoRepository, CityInfoRepository>();
         }
 
@@ -72,6 +72,15 @@
 
             //show status code instead of blank page (browser)
             app.UseStatusCodePages();
+            AutoMapper.Mapper.Initialize(cnf =>
+            {
+                cnf.CreateMap<Entities.City, Models.CityInfoWithoutPointsOfInterest>();
+                cnf.CreateMap<Entities.City, Models.CityDto>();
+                cnf.CreateMap<Entities.PointOfInterest, Models.PointsOfInterestDto>();
+                cnf.CreateMap<Models.PointOfInterestForCreationDto, Entities.PointOfInterest>();
+                cnf.CreateMap<Models.PointOfInterestForUpdateDto, Entities.PointOfInterest>();
+                cnf.CreateMap<Entities.PointOfInterest, Models.PointOfInterestForUpdateDto>();
+            });
             app.UseMvc();
 
             //app.Run(async (context) =>

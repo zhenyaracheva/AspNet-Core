@@ -1,5 +1,6 @@
 ﻿namespace CityInfo.Core.Controllers
 {
+    using AutoMapper;
     using DataStore;
     using Microsoft.AspNetCore.Mvc;
     using Models;
@@ -21,19 +22,7 @@
         public IActionResult GetCities()
         {
             var citiesFromDb = cityInfo.GetCities();
-            var citiesResult = new List<CityInfoWithoutPointsOfInterest>();
-
-            foreach (var city in citiesFromDb)
-            {
-                var current = new CityInfoWithoutPointsOfInterest()
-                {
-                    Id = city.Id,
-                    Name = city.Name,
-                    Description = city.Description
-                };
-
-                citiesResult.Add(current);
-            }
+            var citiesResult = Mapper.Map<IEnumerable<CityInfoWithoutPointsOfInterest>>(citiesFromDb);
 
             return Ok(citiesResult);
         }
@@ -50,32 +39,11 @@
 
             if (includePointsOfInterest)
             {
-                var result = new CityDto
-                {
-                    Id = city.Id,
-                    Name = city.Name,
-                    Description = city.Description
-                };
-
-                foreach (var pointOfInterest in city.PointsOfInterest)
-                {
-                    result.PointsOfInterest.Add(new PointsOfInterestDto
-                    {
-                        Id = pointOfInterest.Id,
-                        Name = pointOfInterest.Name,
-                        Description = pointOfInterest.Description
-                    });
-                }
-
+                var result = Mapper.Map<CityDto>(city);                
                 return Ok(result);
             }
 
-            var cityResult = new CityInfoWithoutPointsOfInterest
-            {
-                Id = city.Id,
-                Name = city.Name,
-                Description = city.Description
-            };
+            var cityResult = Mapper.Map<CityInfoWithoutPointsOfInterest>(city);
             return Ok(cityResult);
         }
     }

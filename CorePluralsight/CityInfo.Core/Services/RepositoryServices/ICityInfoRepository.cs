@@ -14,5 +14,11 @@
         IEnumerable<PointOfInterest> GetPointsOfInterestForCity(int cityId);
 
         PointOfInterest GetPointOfInterestFromCity(int cityId, int pointOfIntrestId);
+
+        bool AddPointOfInterestForCity(int cityId, PointOfInterest pointOfInterest);
+
+        bool DeletePointofInterest(PointOfInterest pointOfInterest);
+
+        bool Save();
     }
 }

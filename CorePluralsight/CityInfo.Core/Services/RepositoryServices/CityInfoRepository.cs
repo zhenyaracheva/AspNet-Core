@@ -16,9 +16,22 @@
             context = cityContext;
         }
 
+        public bool AddPointOfInterestForCity(int cityId, PointOfInterest pointOfInterest)
+        {
+            var city = context.Cities.FirstOrDefault(x => x.Id == cityId);
+            city.PointsOfInterest.Add(pointOfInterest);
+            return Save();
+        }
+
         public bool CityExist(int cityId)
         {
             return context.Cities.Any(x => x.Id == cityId);
+        }
+
+        public bool DeletePointofInterest(PointOfInterest pointOfInterest)
+        {
+            context.PointsOfInterest.Remove(pointOfInterest);
+            return Save();
         }
 
         public IEnumerable<City> GetCities()
@@ -49,6 +62,11 @@
             return context.PointsOfInterest
                 .Where(x => x.CityId == cityId)
                 .ToList();
+        }
+
+        public bool Save()
+        {
+            return context.SaveChanges() >= 0;
         }
     }
 }

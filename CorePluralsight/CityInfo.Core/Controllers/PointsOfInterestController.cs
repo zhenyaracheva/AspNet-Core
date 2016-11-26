@@ -8,6 +8,8 @@
     using Microsoft.Extensions.Logging;
     using Services.RepositoryServices;
     using System.Collections.Generic;
+    using AutoMapper;
+    using Entities;
 
     [Route("api/cities")]
     public class PointsOfInterestController : Controller
@@ -26,8 +28,6 @@
         [HttpGet("{cityId}/pointsofinterest")]
         public IActionResult GetPointsOfInterest(int cityId)
         {
-            //var city = DataStore.CitiesDataStore.Current.Cities
-            //    .FirstOrDefault(x => x.Id == cityId);
             var city = cityInfo.GetCity(cityId, true);
 
             if (city == null)
@@ -36,17 +36,7 @@
                 return NotFound();
             }
 
-            var result = new List<PointsOfInterestDto>();
-
-            foreach (var point in city.PointsOfInterest)
-            {
-                result.Add(new PointsOfInterestDto()
-                {
-                    Id = point.Id,
-                    Name = point.Name,
-                    Description = point.Description
-                });
-            }
+            var result = Mapper.Map<IEnumerable<PointsOfInterestDto>>(city.PointsOfInterest);
 
             return Ok(result);
         }
@@ -70,12 +60,7 @@
                 return NotFound();
             }
 
-            var result = new PointsOfInterestDto()
-            {
-                Id = point.Id,
-                Name = point.Name,
-                Description = point.Description
-            };
+            var result = Mapper.Map<PointsOfInterestDto>(point);
 
             return Ok(result);
         }
@@ -98,28 +83,23 @@
                 return BadRequest();
             }
 
-            var city = DataStore.CitiesDataStore.Current.Cities
-                .FirstOrDefault(p => p.Id == cityId);
+            var city = cityInfo.GetCity(cityId, true);
 
             if (city == null)
             {
                 return NotFound();
             }
 
-            var maxId = DataStore.CitiesDataStore.Current.Cities
-                .SelectMany(o => o.PointsOfInterest)
-                .Max(p => p.Id);
+            var formattedPointOfInterest = Mapper.Map<PointOfInterest>(pointOfInterest);
+            var isSaved = cityInfo.AddPointOfInterestForCity(cityId, formattedPointOfInterest);
 
-
-            var formattedPointOfInterest = new PointsOfInterestDto()
+            if (!isSaved)
             {
-                Id = ++maxId,
-                Name = pointOfInterest.Name,
-                Description = pointOfInterest.Description
-            };
+                return StatusCode(500, "Problem happend while handling your request!");
+            }
 
-            city.PointsOfInterest.Add(formattedPointOfInterest);
-            return CreatedAtRoute("GetPointsOfInterest", new { cityId = city.Id, id = formattedPointOfInterest.Id }, formattedPointOfInterest);
+            var createdPoint = Mapper.Map<Models.PointsOfInterestDto>(formattedPointOfInterest);
+            return CreatedAtRoute("GetPointsOfInterest", new { cityId = city.Id, id = createdPoint.Id }, createdPoint);
         }
 
         [HttpPut("{cityId}/pointsofinterest/{id}")]
@@ -140,8 +120,7 @@
                 return BadRequest();
             }
 
-            var city = DataStore.CitiesDataStore.Current.Cities
-                .FirstOrDefault(p => p.Id == cityId);
+            var city = cityInfo.GetCity(cityId, true);
 
             if (city == null)
             {
@@ -155,8 +134,13 @@
                 NotFound();
             }
 
-            point.Name = pointOfInterest.Name;
-            point.Description = pointOfInterest.Description;
+            Mapper.Map(pointOfInterest, point);
+
+            if (!cityInfo.Save())
+            {
+                return StatusCode(500, "Something happened");
+            }
+            
             return NoContent();
         }
 
@@ -167,14 +151,8 @@
             {
                 return BadRequest();
             }
-
-            if (!ModelState.IsValid)
-            {
-                BadRequest();
-            }
-
-            var city = CitiesDataStore.Current.Cities
-                .FirstOrDefault(p => p.Id == cityId);
+            
+            var city = cityInfo.GetCity(cityId, true);
 
             if (city == null)
             {
@@ -188,12 +166,8 @@
                 NotFound();
             }
 
-            var pointOfInterestToPatch = new PointOfInterestForUpdateDto()
-            {
-                Name = pointOfInterestFromDataStore.Name,
-                Description = pointOfInterestFromDataStore.Description
-            };
-
+            var pointOfInterestToPatch = Mapper.Map<PointOfInterestForUpdateDto>(pointOfInterestFromDataStore);
+           
             patchPoint.ApplyTo(pointOfInterestToPatch, ModelState);
 
             if (!ModelState.IsValid)
@@ -212,9 +186,13 @@
             {
                 BadRequest(ModelState);
             }
+            
+            Mapper.Map(pointOfInterestToPatch, pointOfInterestFromDataStore);
 
-            pointOfInterestFromDataStore.Name = pointOfInterestToPatch.Name;
-            pointOfInterestFromDataStore.Description = pointOfInterestToPatch.Description;
+            if(!cityInfo.Save())
+            {
+                return StatusCode(500, "Error handling Update request");
+            }
 
             return NoContent();
         }
@@ -222,8 +200,7 @@
         [HttpDelete("{cityId}/pointsofinterest/{id}")]
         public IActionResult DeletePointOfInterest(int cityId, int id)
         {
-            var city = CitiesDataStore.Current.Cities
-                .FirstOrDefault(p => p.Id == cityId);
+            var city = cityInfo.GetCity(cityId, true);
 
             if (city == null)
             {
@@ -235,6 +212,13 @@
             if (pointOfInterestFromDataStore == null)
             {
                 NotFound();
+            }
+
+            var IsSaved = cityInfo.DeletePointofInterest(pointOfInterestFromDataStore);
+
+            if(!IsSaved)
+            {
+                return StatusCode(500, "Something happened");
             }
 
             city.PointsOfInterest.Remove(pointOfInterestFromDataStore);
