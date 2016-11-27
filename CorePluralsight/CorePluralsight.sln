@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CityInfo.Core", "CityInfo.Core\CityInfo.Core.xproj", "{044A923B-A3AB-4745-87D5-D2814C62DAA2}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "OdeToFood", "OdeToFood\OdeToFood.xproj", "{E58E4AC4-B371-4139-A0B6-95C670810018}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{044A923B-A3AB-4745-87D5-D2814C62DAA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{044A923B-A3AB-4745-87D5-D2814C62DAA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{044A923B-A3AB-4745-87D5-D2814C62DAA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E58E4AC4-B371-4139-A0B6-95C670810018}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E58E4AC4-B371-4139-A0B6-95C670810018}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E58E4AC4-B371-4139-A0B6-95C670810018}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E58E4AC4-B371-4139-A0B6-95C670810018}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
